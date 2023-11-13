@@ -24,7 +24,7 @@ func aggregatorToString(aggregator CollectorType) string {
 }
 
 func testCollector(aggregator CollectorType, value float64) {
-	metric := "testApp_http_qps"
+	metric := "myapp_http_qps"
 	tags := map[string]string{
 		"from":       "iOS",
 		"aggregator": aggregatorToString(aggregator),
@@ -60,4 +60,9 @@ func TestAllCollectorsInGoroutine(t *testing.T) {
 	go testInGoroutine(&wg, Max)
 	go testInGoroutine(&wg, Min)
 	wg.Wait()
+}
+
+func TestGcCollector(t *testing.T) {
+	SetReportURL("http://127.0.0.1:51001/server/api/putMetrics")
+	startCollectGC()
 }

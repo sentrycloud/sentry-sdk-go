@@ -3,7 +3,7 @@ sentry sdk for sending metrics to sentry_agent or sentry_server in golang
 
 # Install 
 ```
-https://github.com/sentrycloud/sentry-sdk-go
+go get https://github.com/sentrycloud/sentry-sdk-go
 ```
 
 # Usage
