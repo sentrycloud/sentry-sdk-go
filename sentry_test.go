@@ -64,5 +64,5 @@ func TestAllCollectorsInGoroutine(t *testing.T) {
 
 func TestGcCollector(t *testing.T) {
 	SetReportURL("http://127.0.0.1:51001/server/api/putMetrics")
-	startCollectGC()
+	startCollectGC("sdkApp")
 }

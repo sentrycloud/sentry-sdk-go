@@ -4,5 +4,4 @@ func init() {
 	dataChan = make(chan DataPoint, DataChanSize)
 
 	go collect()
-	go startCollectGC()
 }

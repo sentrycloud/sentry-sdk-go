@@ -9,17 +9,21 @@ import (
 const GcInterval = 10
 
 var (
-	goNumCollector   = GetCollector("sentry_go_num", nil, Sum, GcInterval)
-	gcNumCollector   = GetCollector("sentry_gc_num", nil, Sum, GcInterval)
-	gcPauseCollector = GetCollector("sentry_gc_pause", nil, Sum, GcInterval)
+	goNumCollector   Collector
+	gcNumCollector   Collector
+	gcPauseCollector Collector
 
 	lastGCNum   int64         = 0
 	lastGCPause time.Duration = 0
 )
 
-func startCollectGC() {
-	t := time.NewTicker(GcInterval * time.Second)
+func startCollectGC(appName string) {
+	tags := map[string]string{"appName": appName}
+	goNumCollector = GetCollector("sentry_go_num", tags, Sum, GcInterval)
+	gcNumCollector = GetCollector("sentry_gc_num", tags, Sum, GcInterval)
+	gcPauseCollector = GetCollector("sentry_gc_pause", tags, Sum, GcInterval)
 
+	t := time.NewTicker(GcInterval * time.Second)
 	for {
 		select {
 		case <-t.C:

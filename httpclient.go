@@ -46,8 +46,3 @@ func Send(dps []AgentDataPoint) error {
 
 	return nil
 }
-
-// SetReportURL set reportURL to a server report URL, replace the default local agent URL
-func SetReportURL(url string) {
-	reportURL = url
-}

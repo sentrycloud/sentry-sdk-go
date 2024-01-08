@@ -1,10 +1,6 @@
 package sentry
 
-import (
-	"sort"
-	"strings"
-	"time"
-)
+//	sentry sdk API definition, for sdk user only
 
 type CollectorType int
 
@@ -15,71 +11,22 @@ const (
 	Min
 )
 
-type Curve struct {
-	metric     string
-	tags       map[string]string
-	aggregator CollectorType
-	interval   int64
-	uniqueId   string // this is calculated from metric and tags
+type Collector interface {
+	Put(value float64)
+	PutWithTime(value float64, timestamp int64)
 }
 
-type DataPoint struct {
-	Curve
-	timestamp int64
-	value     float64
+// GetCollector used for most scenarios, user just have to get a Collector, then use that to Put metric data
+func GetCollector(metric string, tags map[string]string, aggregator CollectorType, interval int64) Collector {
+	return getDataCollector(metric, tags, aggregator, interval)
 }
 
-type Collector struct {
-	Curve
+// StartCollectGC start collect gc in a separation goroutine
+func StartCollectGC(appName string) {
+	go startCollectGC(appName)
 }
 
-func (b *Collector) Put(value float64) {
-	b.PutWithTime(value, time.Now().Unix())
-}
-
-func (b *Collector) PutWithTime(value float64, timestamp int64) {
-	var dp = DataPoint{}
-	dp.Curve = b.Curve
-	dp.timestamp = timestamp
-	dp.value = value
-
-	// send in non-blocking mode, discard data point when channel is full
-	select {
-	case dataChan <- dp:
-	default:
-	}
-}
-
-func GetCollector(metric string, tags map[string]string, aggregator CollectorType, interval int64) *Collector {
-	collector := &Collector{}
-	collector.metric = metric
-	collector.tags = make(map[string]string)
-	for k, v := range tags {
-		collector.tags[k] = v
-	}
-	collector.aggregator = aggregator
-	collector.interval = interval
-	collector.uniqueId = serializeUniqueId(metric, tags)
-	return collector
-}
-
-func serializeUniqueId(metric string, tags map[string]string) string {
-	// cause go map is random, we need to sort keys to make sure the same tags serialize to the same id
-	var keys []string
-	for k := range tags {
-		keys = append(keys, k)
-	}
-
-	var id strings.Builder
-	id.WriteString(metric)
-	id.WriteString("@")
-
-	sort.Strings(keys)
-	for _, k := range keys {
-		id.WriteString(k)
-		id.WriteString(":")
-		id.WriteString(tags[k])
-		id.WriteString(",")
-	}
-	return id.String()
+// SetReportURL set reportURL to a server report URL, replace the default local agent URL
+func SetReportURL(url string) {
+	reportURL = url
 }
